@@ -1,4 +1,4 @@
-//
+///
 // LESS - Leaner CSS v1.0.35
 // http://lesscss.org
 // 
@@ -549,9 +549,9 @@ less.Parser = function Parser(env) {
             // rule, which represents `{ ... }`, the `ruleset` rule, and this `primary` rule,
             // as represented by this simplified grammar:
             //
-            //     primary  →  (ruleset | rule)+
-            //     ruleset  →  selector+ block
-            //     block    →  '{' primary '}'
+            //     primary  ?  (ruleset | rule)+
+            //     ruleset  ?  selector+ block
+            //     block    ?  '{' primary '}'
             //
             // Only at one point is the primary rule not called from the
             // block rule: at the root level.
@@ -2209,12 +2209,12 @@ var isFileProtocol = (location.protocol === 'file:'    ||
                       location.protocol === 'resource:');
 
 less.env = less.env                         ||
-           location.hostname == '127.0.0.1' ||
+           (location.hostname == '127.0.0.1' ||
            location.hostname == '0.0.0.0'   ||
            location.hostname == 'localhost' ||
            location.port.length > 0         ||
            isFileProtocol                   ? 'development'
-                                            : 'production';
+                                            : 'production');
 
 // Load styles asynchronously (default: false)
 //
@@ -2326,9 +2326,11 @@ function loadStyleSheet(sheet, callback, reload, remaining) {
     if (! /^(https?|file):/.test(href)) {
         href = url.slice(0, url.lastIndexOf('/') + 1) + href;
     }
-
+    // remove ;jsessionid= if found
+    href = href.replace(/;.*$/, '');
+    
     xhr(sheet.href, function (data, lastModified) {
-        if (!reload && styles &&
+        if (!reload && styles && lastModified && lastModified.length > 0 &&
            (new(Date)(lastModified).valueOf() ===
             new(Date)(styles.timestamp).valueOf())) {
             // Use local copy
